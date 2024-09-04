@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="chatbox" class="chatbox"></div>
+    <input type="text" id="userInput" placeholder="Type your message here...">
+    <button id="sendBtn">Send</button>
+
+    <script type="module">
+        const chatbox = document.getElementById('chatbox');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+
+        sendBtn.addEventListener('click', sendMessage);
+
+        async function sendMessage() {
+            const message = userInput.value;
+            if (message.trim() === "") return;
+
+            appendMessage('You: ' + message);
+
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt: message })
+                });
+
+                const data = await response.json();
+                appendMessage('Bot: ' + data.response);
+            } catch (error) {
+                appendMessage('Bot: An error occurred.');
+                console.error('Error:', error);
+            }
+
+            userInput.value = '';
+        }
+
+        function appendMessage(message) {
+            const li = document.createElement('li');
+            li.innerHTML = message; // Use innerHTML to render HTML content
+            chatbox.appendChild(li);
+            chatbox.scrollTop = chatbox.scrollHeight; // Auto scroll
+        }
+    </script>
+</body>
+</html>
